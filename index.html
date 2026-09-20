@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Ecuaciones e Inecuaciones Lineales 2x2</title>
+  
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Estilos complementarios -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-full flex flex-col antialiased">
+
+  <!-- Navbar / Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-extrabold text-lg shadow-sm">
+          &sum;
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">Simulador de Ecuaciones e Inecuaciones Lineales (2&times;2)</h1>
+          <p class="text-xs text-slate-500">Resolución algebraica determinista, plano cartesiano dinámico y desglose paso a paso</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Motor 100% en Vivo
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra de Casos Predefinidos (Presets Rápidos) -->
+  <section class="bg-slate-50 border-b border-slate-200/80 py-2.5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap">
+      <span class="font-semibold text-slate-500 flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Ejemplos Rápidos:
+      </span>
+      <button type="button" data-preset="inequalities" class="px-3 py-1.5 rounded-lg bg-white hover:bg-blue-50 text-blue-700 font-semibold border border-blue-200 shadow-2xs transition">
+        ✦ Región Factible (Inecuaciones)
+      </button>
+      <button type="button" data-preset="bounded" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-medium border border-slate-200 transition">
+        Región Acotada
+      </button>
+      <button type="button" data-preset="unique" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-medium border border-slate-200 transition">
+        Solución Única Estándar
+      </button>
+      <button type="button" data-preset="parallel" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-medium border border-slate-200 transition">
+        Rectas Paralelas (Sin Solución)
+      </button>
+      <button type="button" data-preset="coincident" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-medium border border-slate-200 transition">
+        Coincidentes (Infinitas)
+      </button>
+      <button type="button" data-preset="orthogonal" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-medium border border-slate-200 transition">
+        Vertical y Horizontal
+      </button>
+    </div>
+  </section>
+
+  <!-- Contenido Principal -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+    <!-- Cuadrícula Superior: Parámetros + Canvas -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Columna Izquierda: Parámetros y Configuración (5 cols) -->
+      <div class="lg:col-span-5 space-y-5">
+
+        <!-- Tarjeta Ecuación / Inecuación 1 -->
+        <div class="bg-white rounded-2xl border border-blue-200 shadow-sm p-4 relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-600"></div>
+          
+          <div class="flex items-center justify-between mb-3 pl-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+              <h2 class="font-bold text-slate-900 text-sm">Expresión 1 (Línea Azul)</h2>
+            </div>
+            <span id="preview-eq1" class="font-mono text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200">
+              x + y &le; 4
+            </span>
+          </div>
+
+          <!-- Campos de coeficientes -->
+          <div class="grid grid-cols-12 gap-2 items-center text-sm">
+            <!-- Coeficiente A -->
+            <div class="col-span-3">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Coef. x (a₁)</label>
+              <input id="in-a1" type="number" step="any" value="1" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-center font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+
+            <!-- Coeficiente B -->
+            <div class="col-span-3">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Coef. y (b₁)</label>
+              <input id="in-b1" type="number" step="any" value="1" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-center font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+
+            <!-- Operador -->
+            <div class="col-span-3">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Operador</label>
+              <select id="in-op1" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-center font-bold bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer">
+                <option value="=">=</option>
+                <option value="<=" selected>&le; (menor o igual)</option>
+                <option value=">=">&ge; (mayor o igual)</option>
+                <option value="<">&lt; (estricto)</option>
+                <option value=">">&gt; (estricto)</option>
+              </select>
+            </div>
+
+            <!-- Término independiente C -->
+            <div class="col-span-3">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Const. (c₁)</label>
+              <input id="in-c1" type="number" step="any" value="4" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-center font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Ecuación / Inecuación 2 -->
+        <div class="bg-white rounded-2xl border border-purple-200 shadow-sm p-4 relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-1.5 h-full bg-purple-600"></div>
+          
+          <div class="flex items-center justify-between mb-3 pl-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+              <h2 class="font-bold text-slate-900 text-sm">Expresión 2 (Línea Púrpura)</h2>
+            </div>
+            <span id="preview-eq2" class="font-mono text-xs font-semibold px-2.5 py-1 rounded bg-purple-50 text-purple-700 border border-purple-200">
+              x - y &ge; 0
+            </span>
+          </div>
+
+          <!-- Campos de coeficientes -->
+          <div class="grid grid-cols-12 gap-2 items-center text-sm">
+            <!-- Coeficiente A -->
+            <div class="col-span-3">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Coef. x (a₂)</label>
+              <input id="in-a2" type="number" step="any" value="1" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-center font-mono font-bold focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none">
+            </div>
+
+            <!-- Coeficiente B -->
+            <div class="col-span-3">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Coef. y (b₂)</label>
+              <input id="in-b2" type="number" step="any" value="-1" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-center font-mono font-bold focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none">
+            </div>
+
+            <!-- Operador -->
+            <div class="col-span-3">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Operador</label>
+              <select id="in-op2" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-center font-bold bg-slate-50 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none cursor-pointer">
+                <option value="=">=</option>
+                <option value="<=">&le; (menor o igual)</option>
+                <option value=">=" selected>&ge; (mayor o igual)</option>
+                <option value="<">&lt; (estricto)</option>
+                <option value=">">&gt; (estricto)</option>
+              </select>
+            </div>
+
+            <!-- Término independiente C -->
+            <div class="col-span-3">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Const. (c₂)</label>
+              <input id="in-c2" type="number" step="any" value="0" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-center font-mono font-bold focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Estado y Solución Directa -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Estado del Sistema</span>
+            <span id="badge-system-type" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+              Compatible Determinado
+            </span>
+          </div>
+
+          <div id="card-solution" class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+            <div class="text-xs font-semibold text-slate-500 mb-1">Punto de Intersección de Fronteras:</div>
+            <div id="text-solution-coords" class="text-sm font-medium text-slate-900 leading-normal">
+              P (x: 2, y: 2)
+            </div>
+            <p id="text-solution-desc" class="text-xs text-slate-500 mt-1">
+              Las rectas frontera se intersectan en un único punto.
+            </p>
+          </div>
+
+          <!-- Leyenda de colores -->
+          <div class="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs text-slate-600">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-blue-500 inline-block"></span>
+              <span>Línea 1 (Azul)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-purple-500 inline-block"></span>
+              <span>Línea 2 (Púrpura)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-red-600 inline-block"></span>
+              <span>Intersección P(x, y)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-emerald-500/50 border border-emerald-600 inline-block"></span>
+              <span>Región Factible</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Columna Derecha: Plano Cartesiano Interactivo (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col space-y-3">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex-1 flex flex-col">
+          
+          <!-- Barra superior del gráfico -->
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-slate-800">Plano Cartesiano</span>
+              <span id="hover-coords-badge" class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 text-slate-700 border border-slate-200">
+                X: 0.00, Y: 0.00
+              </span>
+            </div>
+
+            <!-- Botones de Acción de Cámara -->
+            <div class="flex items-center gap-1.5">
+              <button id="btn-zoom-in" title="Acercar (Zoom In)" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 text-base font-bold transition">
+                +
+              </button>
+              <button id="btn-zoom-out" title="Alejar (Zoom Out)" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 text-base font-bold transition">
+                &minus;
+              </button>
+              <button id="btn-reset-view" title="Resetear Vista al Origen (0,0)" class="px-2.5 h-8 rounded-lg border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-xs font-medium text-slate-700 transition">
+                (0,0)
+              </button>
+              <button id="btn-center-sol" title="Enfocar en el punto de corte" class="px-2.5 h-8 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-700 transition">
+                Centrar P
+              </button>
+            </div>
+          </div>
+
+          <!-- Canvas Contenedor -->
+          <div class="relative w-full flex-1 min-h-[460px] bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+            <canvas id="cartesian-canvas" class="w-full h-full block"></canvas>
+            
+            <!-- Instrucción sutil de uso -->
+            <div class="absolute bottom-2 left-2 px-2 py-1 rounded bg-white/80 backdrop-blur-xs text-[11px] text-slate-500 pointer-events-none border border-slate-200/60 shadow-2xs">
+              Arrastra para mover &bull; Rueda para zoom
+            </div>
+          </div>
+
+          <!-- Barra inferior de opciones de visualización -->
+          <div class="mt-3 flex items-center justify-between text-xs text-slate-600 px-1">
+            <div class="flex items-center gap-4">
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input id="toggle-grid" type="checkbox" checked class="rounded text-blue-600 focus:ring-blue-500">
+                <span>Mostrar cuadrícula</span>
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input id="toggle-shading" type="checkbox" checked class="rounded text-blue-600 focus:ring-blue-500">
+                <span>Sombreado de semiplanos</span>
+              </label>
+            </div>
+            <span class="text-slate-400 text-[11px]">Línea continua (&le;, &ge;) &bull; Punteada (&lt;, &gt;)</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sección Inferior: Desglose Paso a Paso -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm border border-indigo-100">
+            1-2-3
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Desglose Analítico Paso a Paso</h2>
+            <p class="text-xs text-slate-500">Explicación pedagógica formal utilizando determinantes (Cramer) y prueba de semiplanos</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenedor del Acordeón Dinámico de Pasos -->
+      <div id="steps-container" class="space-y-3">
+        <!-- Generado dinámicamente por app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
+      Simulador de Sistemas de Ecuaciones e Inecuaciones Lineales (2&times;2) &bull; Arquitectura Limpia &bull; Desacoplado con Canvas 2D
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/math_engine.js"></script>
+  <script src="js/canvas_graph.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
